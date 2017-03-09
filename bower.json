@@ -1,0 +1,24 @@
+{
+  "name": "bem-font-awesome-icons",
+  "description": "Font Awesome icons extracted as SVG in BEM notation",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tadatuta/bem-font-awesome-icons.git"
+  },
+  "homepage": "https://github.com/tadatuta/bem-font-awesome-icons",
+  "main": "",
+  "keywords": [
+    "bem",
+    "components",
+    "icons",
+    "font awesome",
+    "fa",
+    "svg"
+  ],
+  "ignore": [
+    "*",
+    "!icon/**",
+    "!*.md",
+    "!LICENSE.txt"
+  ]
+}
