@@ -50,10 +50,19 @@ const fa = postcss.plugin('fa', function(options = {}) {
     }
 });
 
+function getBemhtmlTmpl(modVal, svg) {
+    return `block('icon').mod('${MOD_NAME}', '${modVal}').content()({
+    html: '${svg}'
+});\n`
+}
+
 function getBhTmpl(modVal, svg) {
     return `module.exports = function(bh) {
     bh.match('icon_${MOD_NAME}_${modVal}', function(ctx) {
-        ctx.content('${svg}');
+        ctx.content({
+            html: '${svg}',
+            tag: false
+        });
     });
 };\n`
 }
@@ -67,7 +76,7 @@ postcss([fa]).process(css).then(result => {
         const svgContent = fs.readFileSync(path.join('tmp', 'svg', filename), 'utf8');
 
         fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + MOD_NAME, BLOCK_NAME + MOD_SEPARATOR + MOD_NAME + MOD_SEPARATOR + modVal + '.bemhtml.js'),
-            `block('icon').mod('${MOD_NAME}', '${modVal}').content()('${svgContent}');\n`);
+            getBemhtmlTmpl(modVal, svgContent));
 
         fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + MOD_NAME, BLOCK_NAME + MOD_SEPARATOR + MOD_NAME + MOD_SEPARATOR + modVal + '.bh.js'),
             getBhTmpl(modVal, svgContent));
