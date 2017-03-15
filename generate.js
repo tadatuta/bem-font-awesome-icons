@@ -29,23 +29,27 @@ const glyphMap = {};
 const fa = postcss.plugin('fa', function(options = {}) {
     return function(css) {
         css.walkRules(function(rule) {
-            const parsedSelector = selectorRegexp.exec(rule.selector);
-            if (!parsedSelector) return;
+            const selectors = rule.selector.split(',');
 
-            const modVal = parsedSelector[1];
+            selectors.forEach(selector => {
+                const parsedSelector = selectorRegexp.exec(selector);
+                if (!parsedSelector) return;
 
-            const styleArr = [
-                '.' + blockWithModName + MOD_SEPARATOR + modVal + ' {'
-            ];
+                const modVal = parsedSelector[1];
 
-            rule.walkDecls(function(decl, i) {
-                glyphMap[decl.value.slice(2, decl.value.length - 1)] = blockWithModName + MOD_SEPARATOR + modVal;
-                styleArr.push(decl.raws.before + '  background-image: url(' + blockWithModName + MOD_SEPARATOR + modVal + '.svg);');
+                const styleArr = [
+                    '.' + blockWithModName + MOD_SEPARATOR + modVal + ' {'
+                ];
+
+                rule.walkDecls(function(decl, i) {
+                    glyphMap[decl.value.slice(2, decl.value.length - 1)] = blockWithModName + MOD_SEPARATOR + modVal;
+                    styleArr.push(decl.raws.before + '  background-image: url(' + blockWithModName + MOD_SEPARATOR + modVal + '.svg);');
+                });
+
+                styleArr.push('\n}');
+
+                fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + BG_MOD_NAME, blockWithModName + MOD_SEPARATOR + modVal + '.css'), styleArr.join(''));
             });
-
-            styleArr.push('\n}');
-
-            fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + BG_MOD_NAME, blockWithModName + MOD_SEPARATOR + modVal + '.css'), styleArr.join(''));
         });
     }
 });
