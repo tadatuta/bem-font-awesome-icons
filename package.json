@@ -1,6 +1,6 @@
 {
   "name": "bem-font-awesome-icons",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Font Awesome icons extracted as SVG in BEM notation",
   "main": "generate.js",
   "scripts": {
