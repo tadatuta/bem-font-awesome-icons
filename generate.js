@@ -21,6 +21,11 @@ if (!fs.existsSync(path.join(BLOCK_NAME, MOD_SEPARATOR + BG_MOD_NAME))) {
     fs.mkdirSync(path.join(BLOCK_NAME, MOD_SEPARATOR + BG_MOD_NAME));
 }
 
+fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + MOD_NAME, BLOCK_NAME + MOD_SEPARATOR + MOD_NAME + '.css'),
+    `.icon svg {
+    fill: currentColor;
+}\n`);
+
 const selectorRegexp = /\.fa\-(.+)\:before/; // .fa-clock-o:before
 
 const css = fs.readFileSync(path.join(faSourceFolder, 'css', 'font-awesome.css'), 'utf8');
