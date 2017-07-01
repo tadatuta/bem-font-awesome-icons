@@ -2,6 +2,8 @@
 
 [Font Awesome](http://fontawesome.io) icons extracted as SVG in BEM notation.
 
+Please refer to [the list of icons with their names](https://tadatuta.github.io/bem-font-awesome-icons/).
+
 ## Content
 
 The library provides two modifiers for each icon:
