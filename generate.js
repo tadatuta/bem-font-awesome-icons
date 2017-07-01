@@ -30,25 +30,33 @@ const selectorRegexp = /\.fa\-(.+)\:before/; // .fa-clock-o:before
 
 const css = fs.readFileSync(path.join(faSourceFolder, 'css', 'font-awesome.css'), 'utf8');
 
-const glyphMap = {};
+const glyphToEntityMap = {};
+const entityToGlyphMap = {};
 const fa = postcss.plugin('fa', function(options = {}) {
     return function(css) {
         css.walkRules(function(rule) {
             const selectors = rule.selector.split(',');
 
+            let firstParsedModVal;
+
             selectors.forEach(selector => {
                 const parsedSelector = selectorRegexp.exec(selector);
+
                 if (!parsedSelector) return;
 
                 const modVal = parsedSelector[1];
+                firstParsedModVal || (firstParsedModVal = modVal);
 
                 const styleArr = [
                     '.' + blockWithModName + MOD_SEPARATOR + modVal + ' {'
                 ];
 
                 rule.walkDecls(function(decl, i) {
-                    glyphMap[decl.value.slice(2, decl.value.length - 1)] = blockWithModName + MOD_SEPARATOR + modVal;
-                    styleArr.push(decl.raws.before + '  background-image: url(' + blockWithModName + MOD_SEPARATOR + modVal + '.svg);');
+                    const glyphId = decl.value.slice(2, decl.value.length - 1);
+
+                    glyphToEntityMap[glyphId] = blockWithModName + MOD_SEPARATOR + firstParsedModVal;
+                    entityToGlyphMap[blockWithModName + MOD_SEPARATOR + modVal] = glyphId;
+                    styleArr.push(decl.raws.before + '  background-image: url(' + blockWithModName + MOD_SEPARATOR + firstParsedModVal + '.svg);');
                 });
 
                 styleArr.push('\n}');
@@ -77,12 +85,16 @@ function getBhTmpl(modVal, svg) {
 }
 
 postcss([fa]).process(css).then(result => {
-    fontBlast(path.join(faSourceFolder, 'fonts', 'fontawesome-webfont.svg'), 'tmp', { filenames: glyphMap });
+    fontBlast(path.join(faSourceFolder, 'fonts', 'fontawesome-webfont.svg'), 'tmp', { filenames: glyphToEntityMap });
 
-    Promise.all(Object.keys(glyphMap).map(key => {
-        const filename = glyphMap[key] + '.svg';
-        const modVal = glyphMap[key].split(MOD_SEPARATOR).pop();
-        const svgContent = fs.readFileSync(path.join('tmp', 'svg', filename), 'utf8');
+    const readGlyphs = {};
+
+    Promise.all(Object.keys(entityToGlyphMap).map(entity => {
+        const glyphId = entityToGlyphMap[entity];
+        const filename = glyphToEntityMap[glyphId] + '.svg';
+        const modVal = entity.split(MOD_SEPARATOR).pop();
+
+        const svgContent = readGlyphs[filename] || (readGlyphs[filename] = fs.readFileSync(path.join('tmp', 'svg', filename), 'utf8'));
 
         fs.writeFileSync(path.join(BLOCK_NAME, MOD_SEPARATOR + MOD_NAME, BLOCK_NAME + MOD_SEPARATOR + MOD_NAME + MOD_SEPARATOR + modVal + '.bemhtml.js'),
             getBemhtmlTmpl(modVal, svgContent));
